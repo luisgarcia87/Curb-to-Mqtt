@@ -68,6 +68,59 @@ The data received from the Curb WebSocket (such as circuit power consumption) is
 5. Token Refresh
 To ensure continuous operation, the script automatically refreshes the authentication token every 12 hours to avoid expiration, and re-authenticates with the WebSocket if necessary.
 
+## Adding MQTT Sensor to Home Assistant
+
+To monitor the power consumption of your Curb circuits in Home Assistant, you need to create MQTT sensors that subscribe to the topics published by the `Curb-to-Mqtt` script. The script will publish data to MQTT topics in the following format:
+
+> home/curb/power/{circuid-id}
+
+Each topic corresponds to a specific circuit and contains the power consumption data (in watts) and other attributes in the message payload.
+
+### Example Configuration for Home Assistant
+
+Below is an example configuration for an MQTT sensor in Home Assistant to monitor the power consumption of a circuit:
+```
+mqtt:
+  sensor:
+    - name: "Kitchen Dishwasher Power"
+      state_topic: "home/curb/power/{circuit-id}"
+      value_template: "{{ value_json.power }}"
+      unit_of_measurement: "W"
+      device_class: power
+      json_attributes_topic: "home/curb/power/{circuit-id}"
+      json_attributes_template: "{{ value_json | tojson }}"
+```
+## Explanation of Configuration
+- name: The name of the sensor as it will appear in Home Assistant. In this case, it is "Kitchen Dishwasher Power".
+- state_topic: The MQTT topic to subscribe to for receiving power consumption data. - The {circuit-id} in the topic corresponds to the unique ID of the circuit.
+- value_template: A Jinja template to extract the power value from the received JSON payload. This value represents the power consumption of the circuit in watts.
+- unit_of_measurement: The unit for the sensor value. In this case, it's "W" for watts.
+- device_class: Defines the type of sensor. Setting this to power ensures the correct display of power-related data in Home Assistant.
+- json_attributes_topic: The topic that contains additional attributes for the sensor, such as the circuit ID, label, and other relevant data.
+- json_attributes_template: A Jinja template that converts the entire JSON payload into attributes in Home Assistant. The tojson filter converts the payload into a JSON string.
+
+## Multiple MQTT Sensors ###
+If you have multiple circuits, you can create additional sensors by replicating the configuration with different state_topic values for each unique circuit ID. For example:
+```
+mqtt:
+  sensor:
+    - name: "Kitchen Dishwasher Power"
+      state_topic: "home/curb/power/{circuit-id-1}"
+      value_template: "{{ value_json.power }}"
+      unit_of_measurement: "W"
+      device_class: power
+      json_attributes_topic: "home/curb/power/{circuit-id-1}"
+      json_attributes_template: "{{ value_json | tojson }}"
+
+    - name: "Water Pump & Deck Power"
+      state_topic: "home/curb/power/{circuit-id-2}"
+      value_template: "{{ value_json.power }}"
+      unit_of_measurement: "W"
+      device_class: power
+      json_attributes_topic: "home/curb/power/{circuit-id-2}"
+      json_attributes_template: "{{ value_json | tojson }}"
+```
+
 ## Usage
 ### Once the script is running, it will:
 
