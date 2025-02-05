@@ -27,6 +27,10 @@ Run this command inside the folder where the script is located.
 ```
 npm install
 ```
+If you encounter errors you might need to run the command as:
+```
+sudo npm install
+```
 **Create your configuration file:** Create a config.yaml file in the root directory of the project, and specify your Curb API credentials and MQTT settings.
 
 Example **config.yaml**:
