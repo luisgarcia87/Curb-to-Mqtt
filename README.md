@@ -1,6 +1,8 @@
 # **Curb-to-Mqtt**
 
 ## Overview
+Curb Energy is a company that provides real-time energy monitoring solutions. Their flagship product, the Curb energy monitor, is a hardware device that connects to an electrical panel to track electricity usage at the circuit level.
+
 The Curb-to-Mqtt project enables real-time monitoring of energy consumption through Curb's API, integrating this data with MQTT for efficient communication with smart home systems. This solution pulls live data from Curb's WebSocket, transforms it, and publishes it to an MQTT broker, allowing users to receive energy consumption information from their circuits in real time.
 
 ## Features
