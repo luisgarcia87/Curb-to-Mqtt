@@ -39,8 +39,8 @@ Example **config.yaml**:
 
 ```
 TOKEN_URL: "https://energycurb.auth0.com/oauth/token"
-CLIENT_ID: "iKAoRkr3qyFSnJSr3bodZRZZ6Hm3GqC3" # Official client_id from Curb
-CLIENT_SECRET: "dSoqbfwujF72a1DhwmjnqP4VAiBTqFt3WLLUtnpGDmCf6_CMQms3WEy8DxCQR3KY" # Official client_secret from Curb
+CLIENT_ID: "iKAoRkr3qyFSnJSr3bodZRZZ6Hm3GqC3" # Official client_id from Curb #
+CLIENT_SECRET: "dSoqbfwujF72a1DhwmjnqP4VAiBTqFt3WLLUtnpGDmCf6_CMQms3WEy8DxCQR3KY" # Official client_secret from Curb #
 USERNAME: "YOUR-CURB-USERNAME" # Curb's login username/email information #
 PASSWORD: "YOUR-CURB-PASSWORD" # Curb's password information #
 AUDIENCE: "app.energycurb.com/api" 
