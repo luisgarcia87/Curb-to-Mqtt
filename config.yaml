@@ -1,0 +1,10 @@
+TOKEN_URL: "https://energycurb.auth0.com/oauth/token"
+CLIENT_ID: "iKAoRkr3qyFSnJSr3bodZRZZ6Hm3GqC3" 
+CLIENT_SECRET: "dSoqbfwujF72a1DhwmjnqP4VAiBTqFt3WLLUtnpGDmCf6_CMQms3WEy8DxCQR3KY"
+USERNAME: "YOUR-CURB-USERNAME" # Curb's login username/email information #
+PASSWORD: "YOUR-CURB-PASSWORD" # Curb's password information #
+AUDIENCE: "app.energycurb.com/api" 
+MQTT_BROKER_URL: "mqtt://YOUR-MQTT-BROKER:1883" # MQTT Broker URL, default port 1883 #
+MQTT_TOPIC: "home/curb/power" # You can change the topic to what ever you like it to be #
+MQTT_USERNAME: "YOUR-MQTT-USERNAME"  # Leave empty if no username is needed
+MQTT_PASSWORD: "YOUR-MQTT-PASSWORD"  # Leave empty if no password is needed
