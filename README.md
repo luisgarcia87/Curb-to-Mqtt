@@ -31,7 +31,7 @@ If you encounter errors you might need to run the command as:
 ```
 sudo npm install
 ```
-**Create your configuration file:** Create a config.yaml file in the root directory of the project, and specify your Curb API credentials and MQTT settings.
+**Edit the configuration file:** Edit the config.yaml file in the root directory of the project, and specify your Curb API credentials and MQTT settings.
 
 Example **config.yaml**:
 
@@ -74,10 +74,10 @@ To ensure continuous operation, the script automatically refreshes the authentic
 
 ## Running as a service ##
 
-### Step 1: Move Your Script to a Suitable Location
+### Step 1: Ensure Your Script is in a Suitable Location
 First, ensure that the curb-to-mqtt.js script (or whatever you named it) is located in a directory where you want to run it. For this example, the script is located in
 
-> /home/pi/projects/curb-to-mqtt/curb-to-mqtt.js 
+> /home/pi/projects/Curb-to-Mqtt/curb-to-mqtt.js 
 
 ## Step 2: Create the Systemd Service File
 You need to create a systemd service file that will manage the script. To do this:
@@ -85,7 +85,7 @@ Open the systemd service file in an editor.
 ```
 sudo nano /etc/systemd/system/curb-to-mqtt.service
 ```
-Add the following configuration to the file, based on your working example. Ensure that you modify it to fit your specific file paths and settings.
+Add the following configuration to the file, based on your working example. Ensure that you modify it to fit your specific file paths and settings and user and group ownership.
 ```
 [Unit]
 Description=Curb API Token & MQTT Forwarder
@@ -107,26 +107,39 @@ WantedBy=multi-user.target
 ## Step 3: Set Permissions for the Service File
 Ensure that the service file has the correct permissions so that systemd can access it:
 ```
-sudo chmod 644 /etc/systemd/system/curb-mqtt.service
+sudo chmod 644 /etc/systemd/system/curb-to-mqtt.service
 ```
 
 ## Step 4: Reload Systemd and Enable the Service
 eload the systemd daemon to recognize the new service, and enable it to start at boot:
 ```
 sudo systemctl daemon-reload
-sudo systemctl enable curb-mqtt.service
+sudo systemctl enable curb-to-mqtt.service
 ```
 
 ## Step 5: Start the Service
 Now, start the service to run the script:
 ```
-sudo systemctl start curb-mqtt.service
+sudo systemctl start curb-to-mqtt.service
 ```
 
 ## Step 6: Verify the Service is Running
 ```
-sudo systemctl status curb-mqtt.service
+sudo systemctl status curb-to-mqtt.service
 ```
+## Troubleshooting
+
+If the service does not run, you might need to modify permission on the script folder location:
+
+_Set the correct ownership (change 'pi' to the user you are using for the service)_
+```
+sudo chown -R pi:pi /home/pi/projects/Curb-to-Mqtt
+```
+_Set the correct permissions for the folder and script_
+```
+sudo chmod -R 755 /home/pi/projects/Curb-to-Mqtt
+```
+
 If you want to view the logs for troubleshooting, you can use:
 ```
 tail -f /var/log/curb.log
