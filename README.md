@@ -51,7 +51,7 @@ MQTT_PASSWORD: "YOUR-MQTT-PASSWORD"  # Leave empty if no password is needed
 ```
 Change **USERNAME, PASSWORD, MQTT_BROKER_URL, MQTT_USERNAME, MQTT_PASSWORD** with your own information, you may leave **MQTT_TOPIC** as is or change it to your topic of preference.
 
-Run the following command in the folder where the script is locataed:
+Run the following command in the folder where the script is located:
 ```
 node curb-to-mqtt.js
 ```
