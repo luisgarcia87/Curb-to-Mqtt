@@ -87,7 +87,7 @@ Open the systemd service file in an editor.
 ```
 sudo nano /etc/systemd/system/curb-to-mqtt.service
 ```
-Add the following configuration to the file, based on your working example. Ensure that you modify it to fit your specific file paths and settings and user and group ownership.
+Add the following configuration to the file, based on your working example. Ensure that you modify it to fit your specific file paths, setting, user and group ownership.
 ```
 [Unit]
 Description=Curb API Token & MQTT Forwarder
