@@ -220,3 +220,6 @@ mqtt:
 - WebSocket disconnections, which are automatically reconnected after a brief delay.
 
 I am in no way an expert in this subject so feel free to comment and propose a better or improved code. I also need help if possible to make a custom HACS component out of this to be able to configure everything from Home Assistant UI.
+
+## Disclaimer
+This project is not affiliated with or endorsed by Curb Energy.
