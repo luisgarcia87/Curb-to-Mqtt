@@ -170,6 +170,9 @@ mqtt:
       json_attributes_topic: "home/curb/power/{circuit-id}"
       json_attributes_template: "{{ value_json | tojson }}"
 ```
+
+<img src="https://github.com/user-attachments/assets/d4b64b32-e041-4919-836c-b5aca831247c" width="30%" height="30%"/>
+
 ## Explanation of Configuration
 - name: The name of the sensor as it will appear in Home Assistant. In this case, it is "Kitchen Dishwasher Power".
 - state_topic: The MQTT topic to subscribe to for receiving power consumption data. - The {circuit-id} in the topic corresponds to the unique ID of the circuit.
