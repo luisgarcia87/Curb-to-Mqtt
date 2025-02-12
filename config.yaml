@@ -8,3 +8,4 @@ MQTT_BROKER_URL: "mqtt://YOUR-MQTT-BROKER:1883" # MQTT Broker URL, default port 
 MQTT_TOPIC: "home/curb/power" # You can change the topic to what ever you like it to be #
 MQTT_USERNAME: "YOUR-MQTT-USERNAME"  # Leave empty if no username is needed #
 MQTT_PASSWORD: "YOUR-MQTT-PASSWORD"  # Leave empty if no password is needed #
+DEBUG: false # Set to true to enable output and debug messages #
