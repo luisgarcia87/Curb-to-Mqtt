@@ -9,10 +9,12 @@ Curb Energy is a company that provides real-time energy monitoring solutions. Th
 The Curb-to-Mqtt project enables real-time monitoring of energy consumption through Curb's API, integrating this data with MQTT for efficient communication with smart home systems. This solution pulls live data from Curb's WebSocket, transforms it, and publishes it to an MQTT broker, allowing users to receive energy consumption information from their circuits in real time.
 
 ## Features
-- OAuth 2.0 Authentication: The script automatically authenticates with the Curb API to obtain a user-specific access token.
-- Location Fetching: Fetches the user's location ID dynamically using the authentication token, ensuring that the data corresponds to the correct location.
-- MQTT Integration: Publishes energy consumption data to a configurable MQTT broker. Supports both authenticated and non-authenticated MQTT brokers.
-- Dynamic Configuration: Configuration values such as API credentials, MQTT settings, and more can be stored in a configurable YAML file with support for comments.
+- **OAuth 2.0 Authentication**: The script automatically authenticates with the Curb API to obtain a user-specific access token.
+- **Location Fetching**: Fetches the user's location ID dynamically using the authentication token, ensuring that the data corresponds to the correct location.
+- **MQTT Integration**: Publishes energy consumption data to a configurable MQTT broker. Supports both authenticated and non-authenticated MQTT brokers.
+- **Dynamic Configuration**: Configuration values such as API credentials, MQTT settings, and more can be stored in a configurable YAML file with support for comments.
+- **Debug Mode**: A new debug mode has been added to reduce excessive logging, helping to improve the stability of the service. You can enable more detailed logs by setting `DEBUG_MODE: true` in the `config.yaml`.
+
 
 ## Requirements
 - Node.js (version 16 or later recommended)
@@ -51,6 +53,7 @@ MQTT_BROKER_URL: "mqtt://YOUR-MQTT-BROKER:1883" # MQTT Broker URL, default port 
 MQTT_TOPIC: "home/curb/power" # You can change the topic to what ever you like it to be #
 MQTT_USERNAME: "YOUR-MQTT-USERNAME"  # Leave empty if no username is needed
 MQTT_PASSWORD: "YOUR-MQTT-PASSWORD"  # Leave empty if no password is needed
+DEBUG_MODE: false # Set to true to enable detailed logging for debugging purposes.
 ```
 Change **USERNAME, PASSWORD, MQTT_BROKER_URL, MQTT_USERNAME, MQTT_PASSWORD** with your own information, you may leave **MQTT_TOPIC** as is or change it to your topic of preference.
 
@@ -76,6 +79,9 @@ The data received from the Curb WebSocket (such as circuit power consumption) is
 
 5. Token Refresh
 To ensure continuous operation, the script automatically refreshes the authentication token every 12 hours to avoid expiration, and re-authenticates with the WebSocket if necessary.
+
+## Debug Mode (v1.0.1 Update)
+In version 1.0.1, debug mode has been introduced to address issues caused by excessive logging output. You can enable detailed logging by setting `DEBUG_MODE: true` in the `config.yaml` file. This will allow you to see more detailed logs for troubleshooting purposes, but by default, the script runs with reduced logging to improve stability and performance.
 
 ## Running as a service ##
 
