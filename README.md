@@ -1,108 +1,163 @@
-## ⚠️ UPDATE – February 24, 2026
-EMAIL RESPONSE FROM CURB:
-
-Dear Curb Customer,
- 
-We regret to inform you that Curb's cloud support has been discontinued. Any active subscriptions have been cancelled with the remainder of the current period refunded.
- 
-There are no plans at this time to restore support for your device.
-
-CURB team,
-
-## ⚠️ UPDATE – February 23, 2026
-
-Curb's API currently appears to be unavailable.  
-The support email (support@energycurb.com) is also unreachable.
-
-It is possible that the service has been discontinued or temporarily shut down.  
-At this time, all integrations depending on the API are not functioning.
-
-If you have any additional information or updates, please share them via Issues.
 
 # **Curb-to-Mqtt**
-![Github-Mqtt](https://github.com/luisgarcia87/Curb-to-Mqtt/blob/main/Curb-to-Mqtt-small.png)
-
-⚠️ New Update (v1.0.1): Debug mode added, reduced output, improved stability. See the [latest release](https://github.com/luisgarcia87/Curb-to-Mqtt/releases) for details.
 
 ## Overview
 Curb Energy is a company that provides real-time energy monitoring solutions. Their flagship product, the Curb energy monitor, is a hardware device that connects to an electrical panel to track electricity usage at the circuit level.
 
-The Curb-to-Mqtt project enables real-time monitoring of energy consumption through Curb's API, integrating this data with MQTT for efficient communication with smart home systems. This solution pulls live data from Curb's WebSocket, transforms it, and publishes it to an MQTT broker, allowing users to receive energy consumption information from their circuits in real time.
+As of February 24, 2026, Curb has discontinued their cloud support, rendering the existing devices nearly useless.
+However the devices do expose log files locally, which can be accessed to extract the power usage data.
 
-## Features
-- **OAuth 2.0 Authentication**: The script automatically authenticates with the Curb API to obtain a user-specific access token.
-- **Location Fetching**: Fetches the user's location ID dynamically using the authentication token, ensuring that the data corresponds to the correct location.
-- **MQTT Integration**: Publishes energy consumption data to a configurable MQTT broker. Supports both authenticated and non-authenticated MQTT brokers.
-- **Dynamic Configuration**: Configuration values such as API credentials, MQTT settings, and more can be stored in a configurable YAML file with support for comments.
-- **Debug Mode**: A new debug mode has been added to reduce excessive logging, helping to improve the stability of the service. You can enable more detailed logs by setting `DEBUG_MODE: true` in the `config.yaml`.
+The Curb-to-Mqtt project enables monitoring of energy consumption, integrating this data with MQTT for efficient communication with smart home systems. This solution polls a local [Curb Energy Monitor](https://energycurb.com/) status page, parses the load controller log, and publishes per-circuit power readings to an MQTT broker using [Home Assistant MQTT discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery).
 
+---
 
-## Requirements
-- Node.js (version 16 or later recommended)
-- MQTT Broker (can be local or cloud-based)
-- Curb Account (with valid API credentials)
+## How it works
+
+The Curb device exposes a status page at `http://<device-ip>/`. This script:
+
+1. Fetches the page every 5 minutes (1 minute if no new data was found).
+2. Extracts all `Load control got aggregated sample` lines from the load controller log.
+3. Parses the JSON payload in each line, converting the 18 per-circuit Wh/minute readings to watts (`Wh × 60 = W`).
+4. Publishes any samples with a timestamp newer than the last published one, in chronological order.
+5. On first connect, publishes Home Assistant MQTT discovery messages so the device and all 18 sensors appear automatically.
+
+---
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v16 or newer
+- An MQTT broker (e.g. [Mosquitto](https://mosquitto.org/)) accessible on your network
+- Your Curb device reachable by IP on the local network
+
+---
 
 ## Installation
 
-**Clone the repository:**
-```
-git clone https://github.com/luisgarcia87/Curb-to-Mqtt.git
-cd Curb-to-Mqtt
-```
-
-**Install dependencies:**
-Run this command inside the folder where the script is located.
-```
+```bash
+git clone https://github.com/pvanbaren/Curb-to-Mqtt.git
+cd curb-to-mqtt
 npm install
 ```
-If you encounter errors you might need to run the command as:
-```
-sudo npm install
-```
-**Edit the configuration file:** Edit the config.yaml file in the root directory of the project, and specify your Curb API credentials and MQTT settings.
 
-Example **config.yaml**:
+### Dependencies
 
-```
-TOKEN_URL: "https://energycurb.auth0.com/oauth/token"
-CLIENT_ID: "iKAoRkr3qyFSnJSr3bodZRZZ6Hm3GqC3" # Official client_id from Curb #
-CLIENT_SECRET: "dSoqbfwujF72a1DhwmjnqP4VAiBTqFt3WLLUtnpGDmCf6_CMQms3WEy8DxCQR3KY" # Official client_secret from Curb #
-USERNAME: "YOUR-CURB-USERNAME" # Curb's login username/email information #
-PASSWORD: "YOUR-CURB-PASSWORD" # Curb's password information #
-AUDIENCE: "app.energycurb.com/api" 
-MQTT_BROKER_URL: "mqtt://YOUR-MQTT-BROKER:1883" # MQTT Broker URL, default port 1883 #
-MQTT_TOPIC: "home/curb/power" # You can change the topic to what ever you like it to be #
-MQTT_USERNAME: "YOUR-MQTT-USERNAME"  # Leave empty if no username is needed
-MQTT_PASSWORD: "YOUR-MQTT-PASSWORD"  # Leave empty if no password is needed
-DEBUG_MODE: false # Set to true to enable detailed logging for debugging purposes.
-```
-Change **USERNAME, PASSWORD, MQTT_BROKER_URL, MQTT_USERNAME, MQTT_PASSWORD** with your own information, you may leave **MQTT_TOPIC** as is or change it to your topic of preference.
+| Package | Purpose |
+|---|---|
+| `axios` | HTTP polling |
+| `mqtt` | MQTT client |
+| `js-yaml` | Config file parsing |
 
-Run the following command in the folder where the script is located:
+Install them if not already present:
+
+```bash
+npm install axios mqtt js-yaml
 ```
+
+---
+
+## Configuration
+
+Copy or create `config.yaml` in the same directory as `curb-to-mqtt.js`:
+
+```yaml
+# URL of the Curb device status page
+POLL_URL: "http://192.168.1.236/"
+
+# MQTT broker connection
+MQTT_BROKER_URL: "mqtt://192.168.1.10"
+MQTT_USERNAME: ""
+MQTT_PASSWORD: ""
+
+# Base MQTT topic — each circuit publishes to MQTT_TOPIC/circuit_N
+MQTT_TOPIC: "curb/power"
+
+# Home Assistant MQTT discovery prefix (must match HA configuration)
+HA_DISCOVERY_PREFIX: "homeassistant"
+
+# Unique identifier for this device (no spaces; the serial number works well)
+DEVICE_ID: "curb_cmwg37ps"
+
+# Friendly name shown in Home Assistant
+DEVICE_NAME: "Curb Energy Monitor"
+
+# Optional: friendly names for each of the 18 circuits, in order.
+# Any omitted entries default to "Circuit N".
+CIRCUIT_NAMES:
+  - "Main L1"
+  - "Kitchen"
+  - "Refrigerator"
+  - "Dryer"
+  - "Washer"
+  - "HVAC"
+  - "Main L2"
+  - "Water Heater"
+  - "Dishwasher"
+  - "Microwave"
+  - "Garage"
+  - "Office"
+  - "Master Bedroom"
+  - "Living Room"
+  - "Outdoor Lights"
+  - "Circuit 16"
+  - "Circuit 17"
+  - "Circuit 18"
+
+# Set to true to enable verbose logging
+DEBUG: false
+```
+
+### Finding your circuit order
+
+Enable `DEBUG: true` on the first run. The script logs each circuit value in order (`circuit_1` through `circuit_18`). Cross-reference these with known loads (e.g. turn a large appliance on/off) to identify each circuit and fill in `CIRCUIT_NAMES`.
+
+---
+
+## Running manually
+
+```bash
 node curb-to-mqtt.js
 ```
-This will initiate the connection, authenticate, fetch your location ID, and start subscribing to the Curb WebSocket for real-time data and forward it via MQTT.
 
+With debug output:
 
-## How It Works
-1. Authentication with Curb API
-The script first fetches an authentication token from the Curb API using your CLIENT_ID, CLIENT_SECRET, USERNAME, and PASSWORD. This token is used to authenticate further API requests.
+```bash
+DEBUG=true node curb-to-mqtt.js
+```
 
-2. Fetching Location ID
-Once authenticated, the script makes a GET request to Curb's /locations endpoint, passing the token in the request header. The location ID of your account's first location is retrieved and used to subscribe to your circuits' data.
+Or set `DEBUG: true` in `config.yaml`.
 
-3. Connecting to WebSocket
-With the token and location ID in hand, the script connects to Curb's WebSocket API (/api/circuit-data). It subscribes to real-time data for the specified location and waits for updates on circuit consumption.
+---
 
-4. MQTT Integration
-The data received from the Curb WebSocket (such as circuit power consumption) is then formatted and published to the configured MQTT broker under the topic home/curb/power/{circuit-id}.
+## Home Assistant integration
 
-5. Token Refresh
-To ensure continuous operation, the script automatically refreshes the authentication token every 12 hours to avoid expiration, and re-authenticates with the WebSocket if necessary.
+The script uses MQTT discovery, so no manual sensor configuration is required. Ensure the [MQTT integration](https://www.home-assistant.io/integrations/mqtt/) is enabled in Home Assistant with the same broker.
 
-## Debug Mode (v1.0.1 Update)
-In version 1.0.1, debug mode has been introduced to address issues caused by excessive logging output. You can enable detailed logging by setting `DEBUG_MODE: true` in the `config.yaml` file. This will allow you to see more detailed logs for troubleshooting purposes, but by default, the script runs with reduced logging to improve stability and performance.
+On first run, a device named **Curb Energy Monitor** (or your `DEVICE_NAME`) will appear under **Settings → Devices & Services → MQTT** with 18 power sensors. Each sensor has:
+
+- **Unit:** W
+- **Device class:** Power
+- **State class:** Measurement (compatible with the Energy dashboard)
+
+---
+
+## Polling behaviour
+
+| Condition | Next poll delay |
+|---|---|
+| New samples published | 5 minutes |
+| No new data found | 1 minute |
+
+The Curb status page updates approximately every 5–6 minutes and retains ~60–90 minutes of per-minute samples. On each successful poll the script publishes all samples newer than the last known timestamp, so no readings are skipped if a poll is delayed.
+
+---
+
+## MQTT topic structure
+
+| Topic | Payload |
+|---|---|
+| `curb/power/circuit_N` | `{"circuit": N, "power": 1234.5, "t": 1772837437}` |
+
+All messages are published with `retain: true`.
 
 ## Running as a service ##
 
@@ -179,78 +234,13 @@ tail -f /var/log/curb.log
 
 ## Adding MQTT Sensor to Home Assistant
 
-To monitor the power consumption of your Curb circuits in Home Assistant, you need to create MQTT sensors that subscribe to the topics published by the `Curb-to-Mqtt` script. The script will publish data to MQTT topics in the following format:
-
-> home/curb/power/{circuid-id}
-
-Each topic corresponds to a specific circuit and contains the power consumption data (in watts) and other attributes in the message payload.
-
-### Example Configuration for Home Assistant
-
-Below is an example configuration for an MQTT sensor in Home Assistant to monitor the power consumption of a circuit:
-```
-mqtt:
-  sensor:
-    - name: "Kitchen Dishwasher Power"
-      state_topic: "home/curb/power/{circuit-id}"
-      value_template: "{{ value_json.power }}"
-      unit_of_measurement: "W"
-      device_class: power
-      json_attributes_topic: "home/curb/power/{circuit-id}"
-      json_attributes_template: "{{ value_json | tojson }}"
-```
-## Explanation of Configuration
-- name: The name of the sensor as it will appear in Home Assistant. In this case, it is "Kitchen Dishwasher Power".
-- state_topic: The MQTT topic to subscribe to for receiving power consumption data. - The {circuit-id} in the topic corresponds to the unique ID of the circuit.
-- value_template: A Jinja template to extract the power value from the received JSON payload. This value represents the power consumption of the circuit in watts.
-- unit_of_measurement: The unit for the sensor value. In this case, it's "W" for watts.
-- device_class: Defines the type of sensor. Setting this to power ensures the correct display of power-related data in Home Assistant.
-- json_attributes_topic: The topic that contains additional attributes for the sensor, such as the circuit ID, label, and other relevant data.
-- json_attributes_template: A Jinja template that converts the entire JSON payload into attributes in Home Assistant. The tojson filter converts the payload into a JSON string.
-
-## Multiple MQTT Sensors ###
-If you have multiple circuits, you can create additional sensors by replicating the configuration with different state_topic values for each unique circuit ID. For example:
-```
-mqtt:
-  sensor:
-    - name: "Kitchen Dishwasher Power"
-      state_topic: "home/curb/power/{circuit-id-1}"
-      value_template: "{{ value_json.power }}"
-      unit_of_measurement: "W"
-      device_class: power
-      json_attributes_topic: "home/curb/power/{circuit-id-1}"
-      json_attributes_template: "{{ value_json | tojson }}"
-
-    - name: "Water Pump & Deck Power"
-      state_topic: "home/curb/power/{circuit-id-2}"
-      value_template: "{{ value_json.power }}"
-      unit_of_measurement: "W"
-      device_class: power
-      json_attributes_topic: "home/curb/power/{circuit-id-2}"
-      json_attributes_template: "{{ value_json | tojson }}"
-```
-
-## Usage
-### Once the script is running, it will:
-
-- Continuously fetch real-time power consumption data from your Curb devices.
-- Publish this data to the configured MQTT broker under the topics specified in the MQTT_TOPIC.
-- Automatically refresh the authentication token every 12 hours.
-- You can monitor your energy consumption on any MQTT-compatible platform, such as Home Assistant, Node-RED, or other smart home applications.
-
-## Error Handling
-### The script includes error handling for:
-
-- Failed authentication with the Curb API.
-- Issues fetching location data.
-- Connection issues with the MQTT broker.
-- WebSocket disconnections, which are automatically reconnected after a brief delay.
-
-I am in no way an expert in this subject so feel free to comment and propose a better or improved code. I also need help if possible to make a custom HACS component out of this to be able to configure everything from Home Assistant UI.
+Install and configure the "Mosquitto broker" app in Home Assistant.
+The Curb energy monitor will then appear as a device, and the sensors as entities.
 
 ## Disclaimer
 This project is not affiliated with or endorsed by Curb Energy.
 
-If you found this helpful and want to show your appreciation, you can treat me to a coffee or a beer! I’ve put a lot of time into this working script, and it always makes my day when people say thanks.
+If you found this helpful and want to show your appreciation, you can treat Daniel Garcia to a coffee or a beer! He has put a lot of time into the original script, and it will put a smile
+on his face if someone says thanks.
 
 <a href="https://www.buymeacoffee.com/luisgarciak" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
