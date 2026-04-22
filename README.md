@@ -1,3 +1,15 @@
+## ⚠️ UPDATE – April 22, 2026
+
+Go local.
+
+The Curb device has been successfully rooted thanks to the work of Code Arranger:
+https://github.com/codearranger/curbed
+
+Additionally, with help from pvanbaren, there is now a native Home Assistant integration available:
+https://github.com/pvanbaren/ha-energycurb
+
+Please follow both instructions for natively integrating Curb device to Home Assistant
+
 ## ⚠️ UPDATE – February 24, 2026
 EMAIL RESPONSE FROM CURB:
 
